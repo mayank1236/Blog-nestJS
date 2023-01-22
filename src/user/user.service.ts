@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm'
 import { UserEntity } from './models/user.entity';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { User, UserRole } from './models/user.interface';
 import { from, Observable, switchMap, map, throwError, catchError } from 'rxjs'
 import { AuthService } from 'src/auth/services/auth.service';
@@ -59,6 +59,40 @@ export class UserService {
                 usersPageable.items.forEach(v => { delete v.password })
 
                 return usersPageable;
+            })
+        )
+    }
+
+    paginateFilterByUsername(options: IPaginationOptions, user: User): Observable<Pagination<User>> {
+        let page: number = Number(options.page)
+        let limit: number = Number(options.limit)
+        return from(this.userRepository.findAndCount({
+            skip: (page - 1) * limit || 0,
+            take: limit || 10,
+            order: { id: "ASC" },
+            select: ['id', 'name', 'username', 'email', 'role'],
+            where: [
+                { username: Like(`%${user.username}%`) }
+            ]
+        })).pipe(
+            map(([users, totalUsers]) => {
+                const usersPageable: Pagination<User> = {
+                    items: users,
+                    links: {
+                        first: options.route + `?limit=${limit}`,
+                        previous: options.route + ``,
+                        next: options.route + `?limit=${limit}&page=${page + 1}`,
+                        last: options.route + `?limit=${limit}&page=${Math.ceil(totalUsers / limit)}`
+                    },
+                    meta: {
+                        currentPage: page,
+                        itemCount: users.length,
+                        itemsPerPage: limit,
+                        totalItems: totalUsers,
+                        totalPages: Math.ceil(totalUsers / limit)
+                    }
+                }
+                return usersPageable
             })
         )
     }
