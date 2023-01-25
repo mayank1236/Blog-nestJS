@@ -5,12 +5,14 @@ import { Observable, map, catchError, of } from 'rxjs';
 import { hasRoles } from 'src/auth/decorators/roles.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { User, UserRole } from './models/user.interface';
-import { UserService } from './user.service';
+import { User, UserRole } from '../models/user.interface';
+import { UserService } from '../service/user.service';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { Res, UploadedFile } from '@nestjs/common/decorators';
 import { join } from 'path';
+import { UserIsUserGuard } from 'src/auth/guards/UserIsUser.guard';
+import { Image } from 'src/blog/model/image.interface';
 const path = require('path');
 
 export const storage = {
@@ -53,8 +55,6 @@ export class UserController {
         return this.userService.findOne(params.id);
     }
 
-    // @hasRoles(UserRole.ADMIN)
-    // @UseGuards(JwtAuthGuard, RolesGuard)
     @Get()
     index(
         @Query('page') page: number = 1,
@@ -74,11 +74,14 @@ export class UserController {
 
     }
 
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @hasRoles(UserRole.ADMIN)
     @Delete(":id")
     deleteOne(@Param('id') id: string): Observable<User> {
         return this.userService.deleteOne(Number(id));
     }
 
+    @UseGuards(JwtAuthGuard, UserIsUserGuard)
     @Put(':id')
     updateOne(@Param('id') id: string, @Body() user: User): Observable<any> {
         return this.userService.updateOne(Number(id), user);
@@ -95,7 +98,7 @@ export class UserController {
     @Post('upload')
     @UseInterceptors(FileInterceptor('file', storage))
     uploadFile(@UploadedFile() file, @Request() req): Observable<Object> {
-        const user: User = req.user.user;
+        const user: User = req.user;
 
         return this.userService.updateOne(user.id, { profileImage: file.filename }).pipe(
             map((user: User) => ({ profileImage: user.profileImage }))
@@ -103,7 +106,7 @@ export class UserController {
     }
 
     @Get('profile-image/:imagename')
-    findProfileImage(@Param('imagename') imagename, @Res() res): Observable<Object> {
+    findProfileImage(@Param('imagename') imagename, @Res() res): Observable<Image> {
         return of(res.sendFile(join(process.cwd(), 'uploads/profileimages/' + imagename)))
     }
 }
