@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Res, UploadedFile } from '@nestjs/common/decorators';
 import { join } from 'path';
 import { UserIsUserGuard } from 'src/auth/guards/UserIsUser.guard';
+import { Image } from 'src/blog/model/image.interface';
 const path = require('path');
 
 export const storage = {
@@ -105,7 +106,7 @@ export class UserController {
     }
 
     @Get('profile-image/:imagename')
-    findProfileImage(@Param('imagename') imagename, @Res() res): Observable<Object> {
+    findProfileImage(@Param('imagename') imagename, @Res() res): Observable<Image> {
         return of(res.sendFile(join(process.cwd(), 'uploads/profileimages/' + imagename)))
     }
 }
