@@ -20,7 +20,7 @@ export class BlogEntryEntity {
     body: string;
 
     @Column({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP" })
-    created: Date;
+    createdAt: Date;
 
     @Column({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP" })
     updatedAt: Date;

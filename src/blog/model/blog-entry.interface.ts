@@ -8,7 +8,7 @@ export interface BlogEntry {
     body?: string;
     createdAt?: Date;
     updatedAt?: Date;
-    like?: number;
+    likes?: number;
     author?: User;
     headerImage?: string;
     publishedDate?: Date;
