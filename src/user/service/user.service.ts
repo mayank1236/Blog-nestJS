@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm'
-import { UserEntity } from './models/user.entity';
+import { UserEntity } from '../models/user.entity';
 import { Like, Repository } from 'typeorm';
-import { User, UserRole } from './models/user.interface';
+import { User, UserRole } from '../models/user.interface';
 import { from, Observable, switchMap, map, throwError, catchError } from 'rxjs'
 import { AuthService } from 'src/auth/services/auth.service';
 import { paginate, Pagination, IPaginationOptions } from 'nestjs-typeorm-paginate'
@@ -36,7 +36,7 @@ export class UserService {
     }
 
     findOne(id: number): Observable<User> {
-        return from(this.userRepository.findOneBy({ id })).pipe(
+        return from(this.userRepository.findOne({ where: { id: id }, relations: ['blogEntries'] })).pipe(
             map((user: User) => {
                 const { password, ...result } = user;
                 return result;

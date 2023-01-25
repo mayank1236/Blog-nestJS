@@ -4,7 +4,7 @@ export interface BlogEntry {
     id?: number;
     title?: string;
     slug?: string;
-    descriptiong?: string;
+    description?: string;
     body?: string;
     createdAt?: Date;
     updatedAt?: Date;

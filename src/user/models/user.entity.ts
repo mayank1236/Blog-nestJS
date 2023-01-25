@@ -17,7 +17,7 @@ export class UserEntity {
     @Column()
     email: string;
 
-    @Column()
+    @Column({ select: false })
     password: string;
 
     @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
@@ -27,7 +27,7 @@ export class UserEntity {
     profileImage: string;
 
     @OneToMany(type => BlogEntryEntity, blogEntryEntity => blogEntryEntity.author)
-    blogEntries: BlogEntryEntity[]
+    blogEntries: BlogEntryEntity[];
 
     @BeforeInsert()
     emailToLowerCase() {
